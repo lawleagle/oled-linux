@@ -1,5 +1,4 @@
 # OLED Linux
-
 **oled-linux.sh** will watch the backlight changes in **/sys/class/backlight/intel_backlight** and apply changes over there to OLED screens
 
 ## Features
@@ -16,7 +15,6 @@
 
 ## How To Use
 Clone the repository and add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh**, **oled-linux.sh** to your .xinitrc
-###### Example
 This is an example of an **.xinitrc** that loads oled-linux and i3:
 ```bash
 <path-to>/oled-linux/get-current-location.sh &  # optional, for night-light-geolocation
@@ -27,18 +25,16 @@ exec i3
 ```
 
 ## Night Light
-All brightness changes are applied using **redshift**, which allows for nightlight support.
-**oled-linux.sh** will also watch for the file **day-night.txt**, and if the contents of the file are **NIGHT**, a night filter will be applied
+If night light is enabled (by default it is), all brightness changes are applied using **redshift**, which allows for nightlight support. If night light is disabled in the config, brightness changes will be applied with **xrandr**.
+**oled-linux.sh** will also watch for the file **file-pipes/day-night.txt**, and if the contents of the file are **NIGHT**, a night filter will be applied
 
 Default vaules for night filter
 DAY = 6500 (default, unchanged display)
 NIGHT = 3500 (default night-filter value)
 
-We can change the night filter value to whatever you want by modifying **oled-linux.sh** and setting your own value instead of 3500.
-Just for the record, We can change the 6500 value too (granted I don't see why we would want that change)
+We can change the night filter value to whatever you want by modifying **oled-linux.sh** (see configuration section). W can also adjuse the daylight value so we can add a filter during the day too.
 
-Night Light can work without geolocation, in which case you can skip loading **get-current-location.sh** and **watch-location.sh**, but if this option is chosen, one must provide location manually in **file-pipes/location.txt** in the following format: **LATITUDE[N/S] LONGITUDE[E/W]**.
-###### Example
+Night Light can work without geolocation, in which case you can skip loading **get-current-location.sh** and **watch-location.sh**, but if this option is chosen, one must provide location manually in **file-pipes/location.txt** in the following format: **LATITUDE_DEGREES[N/S] LONGITUDE_DEGREES[E/W]**.
 ```bash
 > cat location.txt
 26.123000N 12.578000E
@@ -88,3 +84,11 @@ redshift_step_size=50
 **watch-location.sh** watches for changes in **file-pipes/current-location.sh** and if the location changed, writes the new location to **file-pipes/location.txt**
 
 **set-day-night.sh** writes **DAY** or **NIGHT** to **file-pipes/current-location.sh** whenever it becomes day/night outside according to location data and when the location data is changed. Whenever these things are not happening, this script will sleep.
+
+## Troubleshooting
+If you are running with geolocation enabled, it might take a few minutes for location data to become available. In most cases, location data is only available on active internet connection.
+Maybe... oled-linux is controlling the wrong display? If so, manually set the **oled-screen** value to what it should be (check config section).
+
+## Contribute
+Don't. Just don't. It's illegal. I didn't add a license yet, and by default it is "ALL RIGHTS RESERVED". I'll sue you :)
+I'm kidding, I'm just too lazy for the license stuff for now. Do whatever you want and make a PR. If it's good I'll merge.
