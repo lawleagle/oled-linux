@@ -1,12 +1,20 @@
 #!/bin/bash
+
 cd $(dirname ${BASH_SOURCE[0]})
+echo $$ > file-pipes/day-night-pid.txt
 
+if ! test -f file-pipes/location.txt
+then
+	echo 'ERROR: No location provided (file-pipes/location.txt)'
+	touch file-pipes/location.txt
+	inotifywait -e close_write file-pipes/location.txt
+fi
 
-sunwait poll `cat location.txt` > day-night.txt
+sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
 
 while true
 do
-	sunwait wait `cat location.txt`
-	sunwait poll `cat location.txt` > day-night.txt
+	sunwait wait `cat file-pipes/location.txt`
+	sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
 done
 
