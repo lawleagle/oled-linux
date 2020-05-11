@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd $(dirname ${BASH_SOURCE[0]})
-echo $$ > file-pipes/day-night-pid.txt
+echo $$ > file-pipes/set-day-night-pid.txt
 
 if ! test -f file-pipes/location.txt
 then
