@@ -90,5 +90,4 @@ If you are running with geolocation enabled, it might take a few minutes for loc
 Maybe... oled-linux is controlling the wrong display? If so, manually set the **oled-screen** value to what it should be (check config section).
 
 ## Contribute
-Don't. Just don't. It's illegal. I didn't add a license yet, and by default it is "ALL RIGHTS RESERVED". I'll sue you :)
-I'm kidding, I'm just too lazy for the license stuff for now. Do whatever you want and make a PR. If it's good I'll merge.
+If you found bugs, report them on the issues page. If you modified something, make a pull request.
