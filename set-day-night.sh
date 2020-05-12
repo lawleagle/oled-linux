@@ -15,6 +15,7 @@ sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
 while true
 do
 	sunwait wait `cat file-pipes/location.txt`
+	sleep 1m
 	sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
 done
 
