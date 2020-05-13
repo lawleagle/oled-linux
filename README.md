@@ -13,7 +13,7 @@
 - **sunwait** - (optional) used for monitoring day/night cycle for night light feature
 - **geoclue2** - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
 
-## How To Use
+## How To Install
 Clone the repository and add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh**, **oled-linux.sh** to your .xinitrc
 This is an example of an **.xinitrc** that loads oled-linux and i3:
 ```bash
