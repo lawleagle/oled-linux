@@ -93,4 +93,5 @@ Maybe... oled-linux is controlling the wrong display? If so, manually set the **
 If you found bugs, report them on the issues page. If you modified something, make a pull request.
 
 ## Community
-Discord: https://discord.gg/hag8Hw
+There is a channel for this project on this server. If more will be required, more will be provided.
+Discord: https://discord.gg/t4nV3gpJbU
