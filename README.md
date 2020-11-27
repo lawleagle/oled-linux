@@ -15,7 +15,7 @@
 
 ## How To Install
 Clone the repository and add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh**, **oled-linux.sh** to your .xinitrc
-This is an example of an **.xinitrc** that loads oled-linux and i3:
+This is an example of an **.xinitrc** that loads oled-linux for a user that is using i3. Note that the oled-linux scripts must be invoked before your window manager is started.
 ```bash
 <path-to>/oled-linux/get-current-location.sh &  # optional, for night-light-geolocation
 <paht-to>/oled-linux/watch-location.sh &        # optional, for night-light-geolocation
