@@ -12,17 +12,17 @@ backlight_dir="/sys/class/backlight/intel_backlight/"
 #
 # do xrandr command for a list of screen names
 # e-DP1 is an example of a good screen name
-oled_screen=''
+oled_screen='eDP-1'
 
 # how much to change the brightness on one frame 
 # or how smooth should the brightness changes be
 # the lower the value the longer it takes to transition to a new brightness
 # has to be an integer value, no fractional values are allowed
-brightness_step_size=12
+brightness_step_size=42
 
 # if true, the program will look for changes in 'day_night.txt' and update the redshift temperature accordingly
 # check 'set_day_night.sh' to see how 'day_night.txt' is updated
-use_redshift=true
+use_redshift=false
 
 # nightshift temperature during the day
 daylight_temperature=6500
@@ -59,7 +59,7 @@ max_brightness=$(cat "$backlight_dir/max_brightness")
 
 
 target_brightness=$(cat "$backlight_dir/brightness")
-current_brightness=$(cat "$backlight_dir/max_brightness")
+current_brightness=$max_brightness
 
 target_shift=$daylight_temperature
 current_shift=$daylight_temperature
