@@ -10,16 +10,19 @@
 
 ## Dependencies
 - **inotifywait** - used for watching for file changes with as little CPU usage as possible
+```sh
+sudo apt install inotify-tools
+```
 - **sunwait** - (optional) used for monitoring day/night cycle for night light feature
 - **geoclue2** - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
 
 ## How To Install - Ubuntu
-Clone the repository and add **oled-linux.sh** to your startup applications. See https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en . Can test the script by just running it and it should autostart on next login.
+Clone the repository and add **oled-linux.sh** to your startup applications. See https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en. Can test the script by just running it and it should autostart on next login.
 
 Optionally can add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh** for Redshift. Needs to be enabled in the config section of **oled-linux.sh** as well.
 
 ## Night Light
-If night light is enabled (by default it is), all brightness changes are applied using **redshift**, which allows for nightlight support. If night light is disabled in the config, brightness changes will be applied with **xrandr**.
+If night light is enabled in **oled-linux.sh**, all brightness changes are applied using **redshift**, which allows for nightlight support. If night light is disabled in the config, brightness changes will be applied with **xrandr**.
 **oled-linux.sh** will also watch for the file **file-pipes/day-night.txt**, and if the contents of the file are **NIGHT**, a night filter will be applied
 
 Default vaules for night filter
