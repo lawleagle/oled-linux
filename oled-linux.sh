@@ -85,7 +85,7 @@ do
 	step=$((current_brightness - target_brightness))
 	if [ $step -lt 0 ]; then step=$((-step)); fi
 	brightness_step_size=$((step / 10))
-	if [ $brightness_step_size -lt $((max_brightness/480)) ]; then brightness_step_size=$((max_brightness/480)); fi
+	if [ $brightness_step_size -lt $((max_brightness*0.002)) ]; then brightness_step_size=$((max_brightness*0.002)); fi
 	if [ $step -gt $brightness_step_size ]; then step=$brightness_step_size; fi
 
 	if [ $current_brightness -gt $target_brightness ]
