@@ -14,6 +14,7 @@ backlight_dir="/sys/class/backlight/intel_backlight/"
 # Examples are: e-DP1, eDP-1, eDP-1-1
 oled_screen=''
 
+# Not tested
 # if true, the program will look for changes in 'day_night.txt' and update the redshift temperature accordingly
 # check 'set_day_night.sh' to see how 'day_night.txt' is updated
 use_redshift=false
@@ -29,11 +30,15 @@ night_temperature=3500
 # has to be an integer value, no fractional values are allowed
 redshift_step_size=50
 
+# How quickly to change the screen brightness?
+# Values between 1(immediately) to 500(it takes about 10 seconds for the whole range) make sense.
+# Default is 10.
+brightness_step_size_factor=10
 
 # If no oled_screen is set - try to guess it
 if [[ -z $oled_screen ]]; then
   oled_screen=$(xrandr --current | grep -m 1 ' connected' | awk '{print $1}')
-  echo "Attempting to guess display: $oled_screen"
+  echo "Guessed OLED display as: $oled_screen"
 fi
 
 # check backlight folder
@@ -79,8 +84,8 @@ do
 
 	step=$((current_brightness - target_brightness))
 	if [ $step -lt 0 ]; then step=$((-step)); fi
-	brightness_step_size=$((step / 10))
-	if [ $brightness_step_size -lt $((max_brightness * 2 / 1000)) ]; then brightness_step_size=$((max_brightness * 2 / 1000)); fi
+	brightness_step_size=$((step / brightness_step_size_factor))
+	if [ $brightness_step_size -lt $((max_brightness / 500)) ]; then brightness_step_size=$((max_brightness / 500)); fi
 	if [ $step -gt $brightness_step_size ]; then step=$brightness_step_size; fi
 
 	if [ $current_brightness -gt $target_brightness ]
