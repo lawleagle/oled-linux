@@ -36,13 +36,13 @@ if [[ -z $oled_screen ]]; then
   echo "Attempting to guess display: $oled_screen"
 fi
 
-
+# check backlight folder
 if ! test -d "$backlight_dir"
 then
 	echo "ERROR: wrong configuration. Backlight directory does not exist."
 	exit 0
 fi
-
+# check dependency
 if ! command -v inotifywait
 then
 	echo "ERROR: dependency 'inotifywait' is not installed. Sorry, but this script cannot run without inotifywait"
@@ -50,11 +50,6 @@ then
 fi
 
 
-if [ "$oled_screen" == "" ]
-then
-	echo "here"
-	oled_screen=`xrandr | grep -m 1 ' connected ' | awk '{print $1}'`
-fi
 max_brightness=$(cat "$backlight_dir/max_brightness")	
 
 
