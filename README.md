@@ -10,13 +10,10 @@
 
 ## Dependencies
 - `inotifywait` - used for watching for file changes with as little CPU usage as possible
-```sh
-sudo apt install inotify-tools
-```
 - `sunwait` - (optional) used for monitoring day/night cycle for night light feature
 - `geoclue2` - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
 
-## Installation (Ubuntu)
+## Installation (Ubuntu/Debian)
 
 ```bash
 sudo apt install inotify-tools
