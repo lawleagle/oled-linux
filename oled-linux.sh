@@ -43,7 +43,7 @@ redshift_step_size=50
 # The script will use geoclue to automatically get your location. If you would
 # like to provide it manually instead use the following format:
 # location="42.6604944N 24.7494263E"
-location=''
+location=""
 
 # ------------------------------------------------------------------------------
 
@@ -83,19 +83,21 @@ if $use_redshift; then
     fi
 
     # Attempt to get the location of where-am-i from geoclue2 demos
-    where_am_i=NULL
-    for where_am_i_location in "/usr/lib/geoclue-2.0/demos/where-am-i" \
-                               "/usr/libexec/geoclue-2.0/demos/where-am-i"; do
-        if test -f $where_am_i_location; then
-            where_am_i=$where_am_i_location
-            break
+    if [[ -z $location ]]; then
+        where_am_i=NULL
+        for where_am_i_location in "/usr/lib/geoclue-2.0/demos/where-am-i" \
+                                   "/usr/libexec/geoclue-2.0/demos/where-am-i"; do
+            if test -f $where_am_i_location; then
+                where_am_i=$where_am_i_location
+                break
+            fi
+        done
+        if ! test -f $where_am_i; then
+            yellow "WARNING: Optional dependency 'where-am-i' from geoclue2 demo files could not found." \
+                   "Please install geoclue2 and or geoclue2-demo." \
+                   "Redshift functionality disabled."
+            use_redshift=false
         fi
-    done
-    if ! test -f $where_am_i; then
-        yellow "WARNING: Optional dependency 'where-am-i' from geoclue2 demo files could not found." \
-               "Please install geoclue2 and or geoclue2-demo." \
-               "Redshift functionality disabled."
-        use_redshift=false
     fi
 fi
 
