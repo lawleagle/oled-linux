@@ -1,2 +1,3 @@
-where-am-i-result.txt
-location.txt
+/file-pipes/location.txt
+/file-pipes/current-location.txt
+/file-pipes/where-am-i-result.txt

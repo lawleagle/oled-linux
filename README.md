@@ -22,31 +22,25 @@ sudo apt install inotify-tools
 sudo apt install inotify-tools
 ```
 
-Clone the repository and add **oled-linux.sh** to your [startup applications](https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en).
-You can test the script by simply running it, but you should add it to startup applications to run it automatically.
+Clone the repository and test the script by running it. To automatically run it
+at startup you should add it to your [startup applications](https://help.ubuntu.com/stable/ubuntu-help/startup-applications.html.en).
 
-Optionally you can add **get-current-location.sh**, **watch-location.sh**, **run-set-day-night.sh** for Redshift (Night Light) functionality.
-This also requires installing:
-```bash
-sudo apt install redshift geoclue-2.0 geoclue-2.0 geoclue-2-demo
-snap install sunwait
-```
 
 ## Night Light
-If night light is enabled in **oled-linux.sh**, all brightness changes are applied using `redshift`, which allows for Night Light support. If Night Light is disabled in the config, brightness changes will be applied with **xrandr**.
-**oled-linux.sh** will also watch for the file **file-pipes/day-night.txt**, and if the contents of the file are **NIGHT**, a night filter will be applied
+If night light is enabled in **oled-linux.sh**, all brightness changes are applied using `redshift`, which allows for Night Light support.
+If Night Light is disabled in the config, brightness changes will be applied with **xrandr**.
 
 Default values for night filter:  
 `DAY = 6500` (default, unchanged display)
 `NIGHT = 3500` (default night-filter value)
 
-We can change the night filter value to whatever you want by modifying **oled-linux.sh** (see configuration section). W can also adjuse the daylight value so we can add a filter during the day too.
+You can change the night filter value to whatever you want by modifying
+**oled-linux.sh** (see the configuration options below). You can also adjust
+the daylight value so that you can add a filter during the day as well.
 
-Night Light can work without geolocation, in which case you can skip loading **get-current-location.sh** and **watch-location.sh**, but if this option is chosen, one must provide location manually in **file-pipes/location.txt** in the following format: **LATITUDE_DEGREES[N/S] LONGITUDE_DEGREES[E/W]**.
-```bash
-> cat location.txt
-26.123000N 12.578000E
-```
+Night Light can work without geolocation, in which case you have to specify your
+location in the configuration section using the following format:
+`LATITUDE_DEGREES[N/S] LONGITUDE_DEGREES[E/W]`.
 
 ## Configuration
 Configuration is provided at the top of **oled-linux.sh**.
@@ -88,16 +82,29 @@ night_temperature=4800
 # the lower the value, the longer it takes to transition to a new redshift temperature
 # has to be an integer value, no fractional values are allowed
 redshift_step_size=50
+
+##
+# Location
+# The script will use geoclue to automatically get your location. If you would
+# like to provide it manually instead use the following format:
+# location='42.6604944N 24.7494263E'
+location=''
 ```
 
 ## Performance
-**oled-linux.sh** uses inotifywait to watch for changes in **file-pipes/day-night.txt** and **/sys/class/backlight/intel_backlight**, so it will only work when there are some brightness changes to apply.
+**oled-linux.sh** uses inotifywait to watch for changes in:
+```
+file-pipes/day-night.txt
+/sys/class/backlight/intel_backlight
+```
 
-**get-current-location.sh** checks for location information using geoclue2 every 10 minutes and writes that info to **file-pipes/current-location.sh**
+and it will only work when there are changes to apply.
 
-**watch-location.sh** watches for changes in **file-pipes/current-location.sh** and if the location changed, writes the new location to **file-pipes/location.txt**
+Internally the script uses three services:
 
-**set-day-night.sh** writes **DAY** or **NIGHT** to **file-pipes/current-location.sh** whenever it becomes day/night outside according to location data and when the location data is changed. Whenever these things are not happening, this script will sleep.
+1. The first checks for location information using geoclue2 every 30 minutes and writes that info to `file-pipes/current-location.sh`.
+2. The second watches for changes in `file-pipes/current-location.sh` and if the location changed, writes the new location to `file-pipes/location.txt`.
+3. The third writes `DAY` or `NIGHT` to `file-pipes/current-location.sh` whenever it becomes day/night outside according to location data and when the location data is changed. Whenever these things are not happening, this script will sleep.
 
 ## Troubleshooting
 If you are running with geolocation enabled, it might take a few minutes for location data to become available. In most cases, location data is only available on active internet connection.

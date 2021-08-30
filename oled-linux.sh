@@ -38,6 +38,13 @@ night_temperature=3500
 # has to be an integer value, no fractional values are allowed
 redshift_step_size=50
 
+##
+# Location
+# The script will use geoclue to automatically get your location. If you would
+# like to provide it manually instead use the following format:
+# location='42.6604944N 24.7494263E'
+location=''
+
 # ------------------------------------------------------------------------------
 
 cd $(dirname ${BASH_SOURCE[0]})
@@ -74,6 +81,22 @@ if $use_redshift; then
         yellow "WARNING: optional dependency 'sunwait' is not installed." \
                "Redshift functionality disabled."
     fi
+
+    # Attempt to get the location of where-am-i from geoclue2 demos
+    where_am_i=NULL
+    for where_am_i_location in "/usr/lib/geoclue-2.0/demos/where-am-i" \
+                               "/usr/libexec/geoclue-2.0/demos/where-am-i"; do
+        if test -f $where_am_i_location; then
+            where_am_i=$where_am_i_location
+            break
+        fi
+    done
+    if ! test -f $where_am_i; then
+        yellow "WARNING: Optional dependency 'where-am-i' from geoclue2 demo files could not found." \
+               "Please install geoclue2 and or geoclue2-demo." \
+               "Redshift functionality disabled."
+        use_redshift=false
+    fi
 fi
 
 max_brightness=$(cat "$backlight_dir/max_brightness")
@@ -83,6 +106,83 @@ current_brightness=$max_brightness
 
 target_shift=$daylight_temperature
 current_shift=$daylight_temperature
+
+
+##
+# Redshift background services
+#
+if $use_redshift; then
+    if [[ -z $oled_screen ]]; then
+        ##
+        # Location service
+        #
+        {
+            sleep 1s # Just to make sure the other services are running
+            while true
+            do
+              $where_am_i > file-pipes/where-am-i-result.txt
+
+              latitude=$(cat file-pipes/where-am-i-result.txt | grep -m 1 Latitude | awk '{FS=":";print $2}' | sed 's/?//g')
+              longitude=$(cat file-pipes/where-am-i-result.txt | grep -m 1 Longitude | awk '{FS=":";print $2}'| sed 's/?//g')
+              latitude=${latitude::-1} # removes trailing °
+              longitude=${longitude::-1} # removes trailing °
+
+                if (( $(echo "$latitude < 0" | bc -l) ))
+                then
+                    latitude_suffix='S'
+                else
+                    latitude_suffix='N'
+                fi
+
+                if (( $(echo "$longitude < 0" | bc -l) ))
+                then
+                    longitude_suffix='W'
+                else
+                    longitude_suffix='E'
+                fi
+
+                echo "${latitude}${latitude_suffix} ${longitude}${longitude_suffix}" > file-pipes/current-location.txt
+
+                sleep 30m
+            done
+        } &
+
+        ##
+        # Watch location service
+        #
+        {
+            if ! test -f file-pipes/current_location.txt; then
+                touch file-pipes/current-location.txt
+            fi
+
+            while true; do
+                inotifywait -e close_write file-pipes/current-location.txt
+                if ! diff file-pipes/location.txt file-pipes/current-location.txt
+                then
+                    cp file-pipes/current-location.txt file-pipes/location.txt
+                fi
+            done
+        } &
+    else
+      echo $location > file-pipes/location.txt
+    fi
+
+    ##
+    # Set day night service
+    #
+    {
+        if ! test -f file-pipes/location.txt; then
+            touch file-pipes/location.txt
+            inotifywait -e close_write file-pipes/location.txt
+        fi
+
+        while true
+        do
+          sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
+          sleep 1m
+        done
+    } &
+fi
 
 while true;
 do
@@ -117,19 +217,18 @@ do
 
     percent=`echo "$current_brightness / $max_brightness * 0.9 + 0.1" | bc -l`
 
-    step=$((current_shift - target_shift))
-    if [ $step -lt 0 ]; then step=$((-step)); fi
-    if [ $step -gt $redshift_step_size ]; then step=$redshift_step_size; fi
+    if $use_redshift; then
+        step=$((current_shift - target_shift))
+        if [ $step -lt 0 ]; then step=$((-step)); fi
+        if [ $step -gt $redshift_step_size ]; then step=$redshift_step_size; fi
 
-    if [ $current_shift -gt $target_shift ]
-    then
-        current_shift=$((current_shift - step))
-    else
-        current_shift=$((current_shift + step))
-    fi
+        if [ $current_shift -gt $target_shift ]
+        then
+            current_shift=$((current_shift - step))
+        else
+            current_shift=$((current_shift + step))
+        fi
 
-    if $use_redshift
-    then
         redshift -m randr:screen=$oled_screen -P -O $current_shift -b $percent
         xrandr | grep -m 1 ' connected ' | awk '{print $1}' | while read -r line
         do
