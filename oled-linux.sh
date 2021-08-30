@@ -1,53 +1,9 @@
 #!/bin/bash
 
-##
-# Backlight driver file location
-backlight_dir="/sys/class/backlight/intel_backlight/"
-
-##
-# OLED Display Name
-# If not set the script will attempt to guess it.
-# Use `xrandr --current | grep " connected"` to get a list of all connected
-# displays. Examples are: e-DP1, eDP-1, eDP-1-1
-oled_screen=""
-
-##
-# Brightness step size
-# How quickly to change the screen brightness?
-# Values between 1(immediately) to 500(it takes about 10 seconds for the whole range) make sense.
-# Default is 10.
-brightness_step_size_factor=10
-
-##
-# Redshift (Night Light) functionality
-# If enabled the script will also change the color temperature of the display.
-use_redshift=true
-
-##
-# Color temperature during the day
-daylight_temperature=6500
-
-##
-# Color temperature at night
-night_temperature=3500
-
-##
-# Color temperature step
-# how much to change the temperature of the night light on one frarme
-# the lower the value, the longer it takes to transition to a new redshift temperature
-# has to be an integer value, no fractional values are allowed
-redshift_step_size=50
-
-##
-# Location
-# The script will use geoclue to automatically get your location. If you would
-# like to provide it manually instead use the following format:
-# location="42.6604944N 24.7494263E"
-location=""
-
-# ------------------------------------------------------------------------------
-
 cd $(dirname ${BASH_SOURCE[0]})
+
+# Load configuration file
+source oled-linux.conf
 
 function color(){ echo -e "\e[$1m${*:2}\e[0m"; }
 function red(){ color 31 $@; }
@@ -101,14 +57,7 @@ if $use_redshift; then
     fi
 fi
 
-max_brightness=$(cat "$backlight_dir/max_brightness")
-
-target_brightness=$(cat "$backlight_dir/brightness")
-current_brightness=$max_brightness
-
-target_shift=$daylight_temperature
-current_shift=$daylight_temperature
-
+# Create the file pipes directory if it does not exist
 if ! test -d .file-pipes; then
   mkdir .file-pipes
 fi
@@ -191,10 +140,13 @@ if $use_redshift; then
     } &
 fi
 
-while true;
-do
-    target_brightness=$(cat "$backlight_dir/brightness")
+max_brightness=$(cat "$backlight_dir/max_brightness")
+current_brightness=$max_brightness
+target_shift=$daylight_temperature
+current_shift=$daylight_temperature
 
+while true; do
+    target_brightness=$(cat "$backlight_dir/brightness")
 
     if test -f .file-pipes/day-night.txt; then
       day_night=$(cat .file-pipes/day-night.txt)
@@ -212,7 +164,16 @@ do
 
     if [ $current_brightness -eq $target_brightness ] && [ $current_shift -eq $target_shift ]
     then
-        inotifywait -e close_write $backlight_dir/brightness -e close_write "./.file-pipes/day-night.txt" > /dev/null
+        inotifywait -e close_write $backlight_dir/brightness -e close_write "./.file-pipes/day-night.txt" -e close_write oled-linux.conf > /dev/null
+        # Auto-reloads the following list of variables
+        eval $(
+          source oled-linux.conf;
+          echo backlight_dir="$backlight_dir";
+          echo brightness_step_size_factor="$brightness_step_size_factor";
+          echo daylight_temperature="$daylight_temperature";
+          echo night_temperature="$night_temperature";
+          echo redshift_step_size="$redshift_step_size";
+        )
         continue
     fi
 

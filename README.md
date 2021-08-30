@@ -44,7 +44,7 @@ location in the configuration section using the following format:
 `LATITUDE_DEGREES[N/S] LONGITUDE_DEGREES[E/W]`.
 
 ## Configuration
-Configuration is provided at the top of `oled-linux.sh`.
+Configuration can be set in the `oled-linux.conf` file.
 ```bash
 ##
 # Backlight driver file location
@@ -53,43 +53,48 @@ backlight_dir="/sys/class/backlight/intel_backlight/"
 ##
 # OLED Display Name
 # If not set the script will attempt to guess it.
-# Use `xrandr --current | grep ' connected'` to get a list of all conntected
+# Use `xrandr --current | grep " connected"` to get a list of all connected
 # displays. Examples are: e-DP1, eDP-1, eDP-1-1
-oled_screen=''
+oled_screen=""
 
 ##
 # Brightness step size
 # How quickly to change the screen brightness?
 # Values between 1(immediately) to 500(it takes about 10 seconds for the whole range) make sense.
 # Default is 10.
+# Can be configured at runtime.
 brightness_step_size_factor=10
 
 ##
 # Redshift (Night Light) functionality
 # If enabled the script will also change the color temperature of the display.
+# Can be configured at runtime.
 use_redshift=true
 
 ##
 # Color temperature during the day
+# Can be configured at runtime.
 daylight_temperature=6500
 
 ##
 # Color temperature at night
+# Can be configured at runtime.
 night_temperature=4800
 
 ##
 # Color temperature step
-# how much to change the temperature of the night light on one frarme
+# how much to change the temperature of the night light on one frame
 # the lower the value, the longer it takes to transition to a new redshift temperature
 # has to be an integer value, no fractional values are allowed
+# Can be configured at runtime.
 redshift_step_size=50
 
 ##
 # Location
 # The script will use geoclue to automatically get your location. If you would
 # like to provide it manually instead use the following format:
-# location='42.6604944N 24.7494263E'
-location=''
+# location="42.6604944N 24.7494263E"
+location=""
 ```
 
 ## Performance
