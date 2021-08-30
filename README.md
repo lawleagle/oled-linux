@@ -1,5 +1,5 @@
 # OLED Linux
-**oled-linux.sh** will watch the backlight changes in **/sys/class/backlight/intel_backlight** and apply changes over there to OLED screens
+`oled-linux.sh` will watch the backlight changes in `/sys/class/backlight/intel_backlight` and apply changes over there to OLED screens
 
 ## Features
 - Brightness Change on OLED screens on Linux (main point of the repository)
@@ -9,12 +9,12 @@
 - Works directly on X, is not tightly coupled to any desktop environment, so it should work well in almost any circumstance
 
 ## Dependencies
-- **inotifywait** - used for watching for file changes with as little CPU usage as possible
+- `inotifywait` - used for watching for file changes with as little CPU usage as possible
 ```sh
 sudo apt install inotify-tools
 ```
-- **sunwait** - (optional) used for monitoring day/night cycle for night light feature
-- **geoclue2** - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
+- `sunwait` - (optional) used for monitoring day/night cycle for night light feature
+- `geoclue2` - (optional) used for getting current location for day/night cycle for night light feature. Optional because locaiton can be set manually
 
 ## Installation (Ubuntu)
 
@@ -27,15 +27,15 @@ at startup you should add it to your [startup applications](https://help.ubuntu.
 
 
 ## Night Light
-If night light is enabled in **oled-linux.sh**, all brightness changes are applied using `redshift`, which allows for Night Light support.
-If Night Light is disabled in the config, brightness changes will be applied with **xrandr**.
+If night light is enabled in `oled-linux.sh`, all brightness changes are applied using `redshift`, which allows for Night Light support.
+If Night Light is disabled in the config, brightness changes will be applied with `xrandr`.
 
 Default values for night filter:  
 `DAY = 6500` (default, unchanged display)
 `NIGHT = 3500` (default night-filter value)
 
 You can change the night filter value to whatever you want by modifying
-**oled-linux.sh** (see the configuration options below). You can also adjust
+`oled-linux.sh` (see the configuration options below). You can also adjust
 the daylight value so that you can add a filter during the day as well.
 
 Night Light can work without geolocation, in which case you have to specify your
@@ -43,7 +43,7 @@ location in the configuration section using the following format:
 `LATITUDE_DEGREES[N/S] LONGITUDE_DEGREES[E/W]`.
 
 ## Configuration
-Configuration is provided at the top of **oled-linux.sh**.
+Configuration is provided at the top of `oled-linux.sh`.
 ```bash
 ##
 # Backlight driver file location
