@@ -92,13 +92,14 @@ location=''
 ```
 
 ## Performance
-**oled-linux.sh** uses inotifywait to watch for changes in:
+
+`oled-linux.sh` uses `inotifywait` to watch for changes in:
 ```
 file-pipes/day-night.txt
 /sys/class/backlight/intel_backlight
 ```
 
-and it will only work when there are changes to apply.
+and it will only run when there are changes to apply.
 
 Internally the script uses three services:
 
@@ -107,12 +108,16 @@ Internally the script uses three services:
 3. The third writes `DAY` or `NIGHT` to `file-pipes/current-location.sh` whenever it becomes day/night outside according to location data and when the location data is changed. Whenever these things are not happening, this script will sleep.
 
 ## Troubleshooting
+
 If you are running with geolocation enabled, it might take a few minutes for location data to become available. In most cases, location data is only available on active internet connection.
-Maybe... oled-linux is controlling the wrong display? If so, manually set the **oled-screen** value to what it should be (check config section).
+
+`oled-linux` may controlling the wrong display. If so, manually set the `oled_screen` value to the correct value (check the configuration section).
 
 ## Contribute
+
 If you found bugs, report them on the issues page. If you modified something, make a pull request.
 
 ## Community
+
 There is a channel for this project on this server. If more will be required, more will be provided.
 Discord: https://discord.gg/t4nV3gpJbU

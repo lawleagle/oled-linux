@@ -7,9 +7,9 @@ backlight_dir="/sys/class/backlight/intel_backlight/"
 ##
 # OLED Display Name
 # If not set the script will attempt to guess it.
-# Use `xrandr --current | grep ' connected'` to get a list of all conntected
+# Use `xrandr --current | grep " connected"` to get a list of all connected
 # displays. Examples are: e-DP1, eDP-1, eDP-1-1
-oled_screen=''
+oled_screen=""
 
 ##
 # Brightness step size
@@ -42,7 +42,7 @@ redshift_step_size=50
 # Location
 # The script will use geoclue to automatically get your location. If you would
 # like to provide it manually instead use the following format:
-# location='42.6604944N 24.7494263E'
+# location="42.6604944N 24.7494263E"
 location=''
 
 # ------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ function abort(){ red $@; exit 1; }
 
 # If no oled_screen is set - attempt to guess it
 if [[ -z $oled_screen ]]; then
-    oled_screen=$(xrandr --current | grep -m 1 ' connected' | awk '{print $1}')
+    oled_screen=$(xrandr --current | grep -m 1 " connected" | awk '{print $1}')
     blue "Guessed OLED display as: $oled_screen"
 fi
 
@@ -107,12 +107,16 @@ current_brightness=$max_brightness
 target_shift=$daylight_temperature
 current_shift=$daylight_temperature
 
+if ! test -d .file-pipes; then
+  mkdir .file-pipes
+fi
 
 ##
 # Redshift background services
 #
 if $use_redshift; then
-    if [[ -z $oled_screen ]]; then
+    if [[ -z $location ]]; then
+        blue "Enabled location service."
         ##
         # Location service
         #
@@ -120,10 +124,10 @@ if $use_redshift; then
             sleep 1s # Just to make sure the other services are running
             while true
             do
-              $where_am_i > file-pipes/where-am-i-result.txt
+              $where_am_i > .file-pipes/where-am-i-result.txt
 
-              latitude=$(cat file-pipes/where-am-i-result.txt | grep -m 1 Latitude | awk '{FS=":";print $2}' | sed 's/?//g')
-              longitude=$(cat file-pipes/where-am-i-result.txt | grep -m 1 Longitude | awk '{FS=":";print $2}'| sed 's/?//g')
+              latitude=$(cat .file-pipes/where-am-i-result.txt | grep -m 1 Latitude | awk '{FS=":";print $2}' | sed 's/?//g')
+              longitude=$(cat .file-pipes/where-am-i-result.txt | grep -m 1 Longitude | awk '{FS=":";print $2}'| sed 's/?//g')
               latitude=${latitude::-1} # removes trailing °
               longitude=${longitude::-1} # removes trailing °
 
@@ -141,7 +145,7 @@ if $use_redshift; then
                     longitude_suffix='E'
                 fi
 
-                echo "${latitude}${latitude_suffix} ${longitude}${longitude_suffix}" > file-pipes/current-location.txt
+                echo "${latitude}${latitude_suffix} ${longitude}${longitude_suffix}" > .file-pipes/current-location.txt
 
                 sleep 30m
             done
@@ -151,34 +155,35 @@ if $use_redshift; then
         # Watch location service
         #
         {
-            if ! test -f file-pipes/current_location.txt; then
-                touch file-pipes/current-location.txt
+            if ! test -f .file-pipes/current_location.txt; then
+                touch .file-pipes/current-location.txt
             fi
 
             while true; do
-                inotifywait -e close_write file-pipes/current-location.txt
-                if ! diff file-pipes/location.txt file-pipes/current-location.txt
+                inotifywait -e close_write .file-pipes/current-location.txt
+                if ! diff .file-pipes/location.txt .file-pipes/current-location.txt
                 then
-                    cp file-pipes/current-location.txt file-pipes/location.txt
+                    cp .file-pipes/current-location.txt .file-pipes/location.txt
                 fi
             done
         } &
     else
-      echo $location > file-pipes/location.txt
+      echo $location > .file-pipes/location.txt
     fi
 
     ##
     # Set day night service
     #
     {
-        if ! test -f file-pipes/location.txt; then
-            touch file-pipes/location.txt
-            inotifywait -e close_write file-pipes/location.txt
+        # Make sure the location.txt exists before calling sunwait
+        if ! test -f .file-pipes/location.txt; then
+            touch .file-pipes/location.txt
+            inotifywait -e close_write .file-pipes/location.txt
         fi
 
         while true
         do
-          sunwait poll `cat file-pipes/location.txt` > file-pipes/day-night.txt
+          sunwait poll `cat .file-pipes/location.txt` > .file-pipes/day-night.txt
           sleep 1m
         done
     } &
@@ -188,7 +193,14 @@ while true;
 do
     target_brightness=$(cat "$backlight_dir/brightness")
 
-    day_night=$(cat "./file-pipes/day-night.txt")
+
+    if test -f .file-pipes/day-night.txt; then
+      day_night=$(cat .file-pipes/day-night.txt)
+    else
+      touch .file-pipes/day-night.txt
+      day_night="DAY"
+    fi
+
     if $use_redshift && [ "$day_night" = "NIGHT" ]
     then
         target_shift=$night_temperature
@@ -198,7 +210,7 @@ do
 
     if [ $current_brightness -eq $target_brightness ] && [ $current_shift -eq $target_shift ]
     then
-        inotifywait -e close_write $backlight_dir/brightness -e close_write './file-pipes/day-night.txt' > /dev/null
+        inotifywait -e close_write $backlight_dir/brightness -e close_write "./.file-pipes/day-night.txt" > /dev/null
         continue
     fi
 
@@ -230,7 +242,7 @@ do
         fi
 
         redshift -m randr:screen=$oled_screen -P -O $current_shift -b $percent
-        xrandr | grep -m 1 ' connected ' | awk '{print $1}' | while read -r line
+        xrandr | grep -m 1 " connected " | awk '{print $1}' | while read -r line
         do
             if ! [ "$line" == "$oled_screen" ]
             then
